@@ -26,5 +26,4 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.linearVelocity = new Vector2(moveDirection.x * speed, moveDirection.y * speed);
     }
-
 }
