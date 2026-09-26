@@ -1,11 +1,18 @@
 using UnityEngine;
 
-public class InteractionController : MonoBehaviour, IInteractable
+public class PenelopeInteract : MonoBehaviour, IInteractable
 {
     private bool PlayerIn = false;
+    DialogueSystem dialogueSystem;
+
+    [System.Obsolete]
+    public void Awake()
+    {
+        dialogueSystem = FindObjectOfType<DialogueSystem>();
+    }
     public void Interact()
     {
-            Destroy(gameObject);
+        dialogueSystem.Next();
     }
 
     public void Update()

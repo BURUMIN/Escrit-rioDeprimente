@@ -68,5 +68,8 @@
         "*.slnx": "*.csproj"
     },
     "dotnet.defaultSolution": "Escrit-rioDeprimente.slnx",
-    "dotnet.enableWorkspaceBasedDevelopment": false
+    "dotnet.enableWorkspaceBasedDevelopment": false,
+    "editor.autoIndent": "full",
+    "editor.bracketPairColorization.enabled": false,
+    "editor.formatOnType": true
 }

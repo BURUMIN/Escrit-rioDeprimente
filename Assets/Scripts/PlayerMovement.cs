@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     public Animator animator;
 
     private Vector2 moveDirection;
+
     void Update()
     {
         float moveX = Input.GetAxisRaw("Horizontal");
