@@ -1,60 +1,77 @@
 using UnityEngine;
-
 using UnityEngine.UI;
-using textMeshProUGUI = TMPro.TextMeshProUGUI;
+using TMPro;
 
-public class DialogueUI : MonoBehaviour
+public class DialogueUI : MonoBehaviour 
 {
-    Image background;
-    textMeshProUGUI nameText;
-    textMeshProUGUI talkText;
+    private Image background;
+    private TextMeshProUGUI nameText;
+    private TextMeshProUGUI talkText;
+    private Image portraitImage; // Referência para o Portrait
 
     public float speed = 10f;
-    bool open = false;
-    
-    void Awake()
+    private bool open = false;
+
+    private void Awake() 
     {
-        background = transform.GetChild(0).GetComponent<Image>();
-        nameText = transform.GetChild(1).GetComponent<textMeshProUGUI>();
-        talkText = transform.GetChild(2).GetComponent<textMeshProUGUI>();
-    }
-    void Start()
-    {
+        Transform bgTransform = transform.Find("Background");
+        if (bgTransform != null) background = bgTransform.GetComponent<Image>();
+
+        Transform nameTransform = transform.Find("Name");
+        if (nameTransform != null) nameText = nameTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform textTransform = transform.Find("Text");
+        if (textTransform != null) talkText = textTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform portraitTransform = transform.Find("Portrait");
+        if (portraitTransform != null) portraitImage = portraitTransform.GetComponent<Image>();
         
+        Disable();
     }
 
-    void Update()
+    private void Update() 
     {
-        if (open)
-        {
-            background.fillAmount = Mathf.Lerp(background.fillAmount, 1, Time.deltaTime * speed);
+        if (background == null) return;
+
+        if (open) {
+            background.fillAmount = Mathf.Lerp(background.fillAmount, 1, speed * Time.deltaTime);
+        } else {
+            background.fillAmount = Mathf.Lerp(background.fillAmount, 0, speed * Time.deltaTime);
         }
-        else
+    }
+
+    public void SetName(string name) 
+    {
+        if (nameText != null) nameText.text = name;
+    }
+
+    public void SetPortrait(Sprite sprite)
+    {
+        if (portraitImage != null)
         {
-            background.fillAmount = Mathf.Lerp(background.fillAmount, 0, Time.deltaTime * speed);
+            if (sprite != null)
+            {
+                portraitImage.gameObject.SetActive(true);
+                portraitImage.sprite = sprite;
+            }
+            else
+            {
+                portraitImage.gameObject.SetActive(false); // Oculta se não houver foto
+            }
         }
     }
 
-    public void setName(string name)
+    public void Enable() 
     {
-        nameText.text = name;
-    }
-
-    public void setPortrait(Image portrait)
-    {
-        nameText.text = name;
-    }
-
-    public void enable()
-    {
-        background.fillAmount = 0;
+        if (background != null) background.fillAmount = 0;
         open = true;
     }
 
-    public void disable()
+    public void Disable() 
     {
         open = false;
-        nameText.text = "";
-        talkText.text = "";
+        if (nameText != null) nameText.text = "";
+        if (talkText != null) talkText.text = "";
+        if (portraitImage != null) portraitImage.gameObject.SetActive(false);
     }
 }

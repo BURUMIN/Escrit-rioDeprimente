@@ -3,21 +3,25 @@ using UnityEngine;
 public class PenelopeInteract : MonoBehaviour, IInteractable
 {
     private bool PlayerIn = false;
-    DialogueSystem dialogueSystem;
+    private DialogueSystem dialogueSystem;
 
-    [System.Obsolete]
-    public void Awake()
+    private void Awake()
     {
-        dialogueSystem = FindObjectOfType<DialogueSystem>();
+        dialogueSystem = FindAnyObjectByType<DialogueSystem>();
     }
+
     public void Interact()
     {
-        dialogueSystem.Next();
+        // Só aceita a interação para ABRIR se o sistema de diálogo estiver inativo
+        if (dialogueSystem != null && dialogueSystem.IsDisabled())
+        {
+            dialogueSystem.Next();
+        }
     }
 
     public void Update()
     {
-        if (PlayerIn && Input.GetKeyDown(KeyCode.E)) 
+        if (PlayerIn && Input.GetKeyDown(KeyCode.E))
         {
             Interact();
         }

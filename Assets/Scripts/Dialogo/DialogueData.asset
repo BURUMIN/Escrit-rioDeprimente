@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: DialogueData
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
   talkScript:
-  - portrait: {fileID: 0}
-    name: Tristonho
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
     text: Vamos foder no pelo?
-  - portrait: {fileID: 0}
-    name: "Pen\xE9lope"
+  - name: "Pen\xE9lope"
+    profile: {fileID: -7906640630075394582, guid: 9020c1d5824e2ca40a8b7b69d340cfc4, type: 3}
     text: 'VAMOS, POR FAVOR ESTOURE A MINHA PRECIOSA
 
 '

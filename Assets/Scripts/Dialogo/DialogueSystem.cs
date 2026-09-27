@@ -1,36 +1,49 @@
+using System.Collections;
 using UnityEngine;
 
-public enum STATE
-{
+public enum STATE {
     DISABLED,
     WAITING,
     TYPING
 }
-public class DialogueSystem : MonoBehaviour
+
+public class DialogueSystem : MonoBehaviour 
 {
     public DialogueData dialogueData;
-    STATE state;
-    int currentText = 0;
-    bool finished = false;
-    TypeTextAnimation typeText;
-    DialogueUI dialogueUI;
+    
+    private int currentText = 0;
+    private bool finished = false;
+    private bool isEnding = false; // Flag para ignorar reaberturas no mesmo frame
+    private TypeTextAnimation typeText;
+    private DialogueUI dialogueUI;
+    private STATE state;
 
-    void Awake()
+    private void Awake() 
     {
-        typeText = GetComponent<TypeTextAnimation>();
-        dialogueUI = GetComponent<DialogueUI>();
-        typeText.TypeFinished = onTypeFinished;
+        typeText = FindAnyObjectByType<TypeTextAnimation>();
+        dialogueUI = FindAnyObjectByType<DialogueUI>();
+
+        if (typeText != null)
+        {
+            typeText.TypeFinished += OnTypeFinished;
+        }
     }
 
-    void Start()
+    private void Start() 
     {
         state = STATE.DISABLED;
     }
 
-    void Update()
+    public bool IsDisabled()
+    {
+        return state == STATE.DISABLED && !isEnding;
+    }
+
+    private void Update() 
     {
         if (state == STATE.DISABLED) return;
-        switch (state)
+
+        switch (state) 
         {
             case STATE.WAITING:
                 Waiting();
@@ -39,53 +52,89 @@ public class DialogueSystem : MonoBehaviour
                 Typing();
                 break;
         }
-
     }
-    public void Next()
+
+    public void Next() 
     {
-        if (currentText == 0)
+        if (isEnding) return;
+
+        if (finished)
         {
-            dialogueUI.enable();
+            StartCoroutine(EndDialogueRoutine());
+            return;
+        }
+
+        if (dialogueData == null || dialogueData.talkScript == null || dialogueData.talkScript.Count == 0)
+        {
+            return;
+        }
+
+        if (currentText == 0) 
+        {
+            if (dialogueUI != null) dialogueUI.Enable();
+        }
+
+        if (dialogueUI != null) 
+        {
+            dialogueUI.SetName(dialogueData.talkScript[currentText].name);
+            dialogueUI.SetPortrait(dialogueData.talkScript[currentText].profile);
         }
         
-        dialogueUI.setName(dialogueData.talkScript[currentText].name);
-        typeText.fullText = dialogueData.talkScript[currentText++].text;
-        if (currentText == dialogueData.talkScript.Count) finished = true;
-        typeText.StartTyping();
+        if (typeText != null)
+        {
+            typeText.fullText = dialogueData.talkScript[currentText].text;
+            typeText.StartTyping();
+        }
+
+        currentText++;
+
+        if (currentText >= dialogueData.talkScript.Count) 
+        {
+            finished = true;
+        }
+
         state = STATE.TYPING;
     }
-    void onTypeFinished()
-    {
 
+    private void OnTypeFinished() 
+    {
         state = STATE.WAITING;
-
     }
-    void Waiting()
+
+    private void Waiting() 
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E)) 
         {
-                Next();
-            if (!finished)
+            if (!finished) 
             {
                 Next();
-            } else
+            }
+            else  
             {
-                dialogueUI.disable();
-                state = STATE.DISABLED;
-                currentText = 0;
-                finished = false;
+                StartCoroutine(EndDialogueRoutine());
             }
         }
     }
 
-    void Typing()
+    private void Typing() 
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.E)) 
         {
-            typeText.Skip();
+            if (typeText != null) typeText.Skip();
             state = STATE.WAITING;
         }
     }
-    
 
+    private IEnumerator EndDialogueRoutine()
+    {
+        isEnding = true;
+        if (dialogueUI != null) dialogueUI.Disable();
+        state = STATE.DISABLED;
+        currentText = 0;
+        finished = false;
+
+        // Espera 0.2 segundos antes de liberar que o PenelopeInteract possa abrir o diálogo novamente
+        yield return new WaitForSeconds(0.2f);
+        isEnding = false;
+    }
 }
