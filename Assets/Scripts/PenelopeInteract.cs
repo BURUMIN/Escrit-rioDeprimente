@@ -12,7 +12,6 @@ public class PenelopeInteract : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        // Só aceita a interação para ABRIR se o sistema de diálogo estiver inativo
         if (dialogueSystem != null && dialogueSystem.IsDisabled())
         {
             dialogueSystem.Next();

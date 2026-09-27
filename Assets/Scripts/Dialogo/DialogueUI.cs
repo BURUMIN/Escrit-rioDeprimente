@@ -4,29 +4,29 @@ using TMPro;
 
 public class DialogueUI : MonoBehaviour 
 {
-    private Image background;
-    private TextMeshProUGUI nameText;
-    private TextMeshProUGUI talkText;
-    private Image portraitImage; // Referência para o Portrait
+    [Header("Componentes do Painel (Arraste do Inspector)")]
+    [SerializeField] private Image background;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI talkText;
+    [SerializeField] private Image portraitImage;
 
+    [Header("Configurações")]
     public float speed = 10f;
-    private bool open = false;
+    [SerializeField] private bool open = false;
 
-    private void Awake() 
+    private void Awake()
     {
-        Transform bgTransform = transform.Find("Background");
-        if (bgTransform != null) background = bgTransform.GetComponent<Image>();
+        if (background == null) background = transform.Find("Background")?.GetComponent<Image>();
+        if (nameText == null) nameText = transform.Find("Name")?.GetComponent<TextMeshProUGUI>();
+        if (talkText == null) talkText = transform.Find("Text")?.GetComponent<TextMeshProUGUI>();
+        if (portraitImage == null) portraitImage = transform.Find("Portrait")?.GetComponent<Image>();
 
-        Transform nameTransform = transform.Find("Name");
-        if (nameTransform != null) nameText = nameTransform.GetComponent<TextMeshProUGUI>();
-
-        Transform textTransform = transform.Find("Text");
-        if (textTransform != null) talkText = textTransform.GetComponent<TextMeshProUGUI>();
-
-        Transform portraitTransform = transform.Find("Portrait");
-        if (portraitTransform != null) portraitImage = portraitTransform.GetComponent<Image>();
-        
-        Disable();
+        if (open)
+        {
+            Enable();
+        } else {
+            Disable();
+        }
     }
 
     private void Update() 
@@ -56,7 +56,7 @@ public class DialogueUI : MonoBehaviour
             }
             else
             {
-                portraitImage.gameObject.SetActive(false); // Oculta se não houver foto
+                portraitImage.gameObject.SetActive(false);
             }
         }
     }

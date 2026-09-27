@@ -3,16 +3,28 @@ using UnityEngine;
 public class InteractionController : MonoBehaviour, IInteractable
 {
     private bool PlayerIn = false;
+    private DialogueSystem dialogueSystem;
+    public GameObject destroyOnFinish; // Referência ao objeto que será destruído
+
+    private void Awake()
+    {
+        dialogueSystem = FindAnyObjectByType<DialogueSystem>();
+    }
+
     public void Interact()
     {
-            Destroy(gameObject);
+        if (dialogueSystem != null && dialogueSystem.IsDisabled())
+        {
+            dialogueSystem.Next();
+        }
     }
 
     public void Update()
     {
-        if (PlayerIn && Input.GetKeyDown(KeyCode.E)) 
+        if (PlayerIn || Input.GetKeyDown(KeyCode.E))
         {
             Interact();
+            Destroy(destroyOnFinish); // Destroi o objeto após a interação
         }
     }
 

@@ -11,9 +11,9 @@ public class DialogueSystem : MonoBehaviour
 {
     public DialogueData dialogueData;
     
-    private int currentText = 0;
-    private bool finished = false;
-    private bool isEnding = false; // Flag para ignorar reaberturas no mesmo frame
+    public int currentText = 0;
+    public bool finished = false;
+    private bool isEnding = false;
     private TypeTextAnimation typeText;
     private DialogueUI dialogueUI;
     private STATE state;
@@ -133,7 +133,6 @@ public class DialogueSystem : MonoBehaviour
         currentText = 0;
         finished = false;
 
-        // Espera 0.2 segundos antes de liberar que o PenelopeInteract possa abrir o diálogo novamente
         yield return new WaitForSeconds(0.2f);
         isEnding = false;
     }
