@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ba173a0947ed8e4ebd111675940524a, type: 3}
-  m_Name: Acordar
+  m_Name: Acordar1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
   talkScript:
   - name: Tristonho
     profile: {fileID: 0}
-    text: Mais um dia...
+    text: "J\xE1 \xE9 segunda de novo..."
   - name: Tristonho
     profile: {fileID: 0}
-    text: De volta ao trabalho
+    text: Melhor sair pra trabalhar logo.

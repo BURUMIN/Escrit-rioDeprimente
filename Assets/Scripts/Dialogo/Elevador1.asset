@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ba173a0947ed8e4ebd111675940524a, type: 3}
+  m_Name: Elevador1
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  talkScript:
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
+    text: Bom dia, como foi o final de semana?
+  - name: "Ant\xF4nio"
+    profile: {fileID: -4533725995553161979, guid: 61ed8be260d93294abb47239ca9b5721, type: 3}
+    text: "Bom dia, tris! Me diverti muito, eu e meu marido sa\xEDmos para jantar."
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
+    text: "Isso parece maravilhoso, Ant\xF4nio."
+  - name: "Ant\xF4nio"
+    profile: {fileID: -4533725995553161979, guid: 61ed8be260d93294abb47239ca9b5721, type: 3}
+    text: Foi realmente maravilhoso.
+  - name: "Ant\xF4nio"
+    profile: {fileID: -4533725995553161979, guid: 61ed8be260d93294abb47239ca9b5721, type: 3}
+    text: mas e o seu final de semana?
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
+    text: Passei descansando.
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
+    text: A semana passada foi muito puxada.
+  - name: "Ant\xF4nio"
+    profile: {fileID: -4533725995553161979, guid: 61ed8be260d93294abb47239ca9b5721, type: 3}
+    text: "Foi mesmo, voc\xEA estava mesmo merecendo um descanso."
+  - name: "Ant\xF4nio"
+    profile: {fileID: -4533725995553161979, guid: 61ed8be260d93294abb47239ca9b5721, type: 3}
+    text: . . .
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
+    text: . . .
+  - name: Tristonho
+    profile: {fileID: -7757445154028467576, guid: fde4fab71a21bad4ba5b13a8003b527b, type: 3}
+    text: "Muito bom falar com voc\xEA, tenha um bom dia."
+  - name: "Ant\xF4nio"
+    profile: {fileID: -4533725995553161979, guid: 61ed8be260d93294abb47239ca9b5721, type: 3}
+    text: "Um bom dia pra voc\xEA tamb\xE9m!"
