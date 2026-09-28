@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -9,16 +10,22 @@ public class TypingManager : MonoBehaviour
 
     [Header("UI References")]
     public GameObject miniGameCanvas;
-    public TextMeshProUGUI wordDisplay;
-    public TextMeshProUGUI inputDisplay;
+    public TextMeshProUGUI wordDisplay; // Apenas um TextMeshProUGUI é necessário!
+    public TextMeshProUGUI inputDisplay; // Opcional (pode deixar None se usar tudo no wordDisplay)
+
+    [Header("Cores (Rich Text)")]
+    public Color correctColor = new Color(0.13f, 0.77f, 0.36f); // Verde
+    public Color errorColor = new Color(0.93f, 0.27f, 0.27f);   // Vermelho
+    public Color remainingColor = Color.white;                  // Branco
 
     [Header("Word Settings")]
     public TextAsset wordsFile;
     private string[] wordList;
-
+    
     private string targetWord = "";
     private string currentInput = "";
     private bool isGameActive = false;
+    private bool isFlashingError = false;
 
     void Start()
     {
@@ -51,16 +58,16 @@ public class TypingManager : MonoBehaviour
         targetWord = wordList[UnityEngine.Random.Range(0, wordList.Length)];
         currentInput = "";
         isGameActive = true;
+        isFlashingError = false;
 
         if (miniGameCanvas != null) miniGameCanvas.SetActive(true);
-        UpdateUI();
+        UpdateColoredUI();
     }
 
     void Update()
     {
-        if (!isGameActive) return;
+        if (!isGameActive || isFlashingError) return;
 
-        // Captura caracteres digitados pelo jogador de forma segura
         foreach (char c in Input.inputString)
         {
             if (c == '\b') // Backspace
@@ -68,52 +75,84 @@ public class TypingManager : MonoBehaviour
                 if (currentInput.Length > 0)
                 {
                     currentInput = currentInput.Substring(0, currentInput.Length - 1);
-                    UpdateUI();
+                    UpdateColoredUI();
                 }
             }
-            else if (c == '\n' || c == '\r') // Enter
+            else if (c == '\n' || c == '\r') // Enter (ignorado)
             {
-                // Opcional: Submeter com Enter
+                continue;
             }
             else
             {
-                // Adiciona o caractere digitado
-                currentInput += c;
-                ValidateInput();
+                // Processa novo caractere digitado
+                ProcessTypedChar(c);
             }
         }
     }
 
-    void ValidateInput()
+    void ProcessTypedChar(char typedChar)
     {
-        UpdateUI();
+        int nextIndex = currentInput.Length;
 
-        // 1. Checa se o texto digitado até agora está correto
-        if (!targetWord.StartsWith(currentInput, StringComparison.OrdinalIgnoreCase))
+        // Checa se o caractere digitado coincide com o caractere esperado da targetWord
+        if (nextIndex < targetWord.Length && 
+            char.ToLower(typedChar) == char.ToLower(targetWord[nextIndex]))
         {
-            // O jogador ERROU a digitação!
-            Debug.LogWarning("[TypingManager] Erro de digitação detectado! Reiniciando entrada/Falhando...");
+            // ACERTOU a letra
+            currentInput += targetWord[nextIndex]; // Mantém o casing original
+            UpdateColoredUI();
 
-            // Opção A: Limpar a palavra ao errar
-            currentInput = "";
-            UpdateUI();
-
-            // Descomente a linha abaixo se quiser que um ERRO feche o minigame imediatamente:
-            // FailMiniGame(); 
-            return;
+            // Checa se completou a palavra inteira
+            if (currentInput.Length == targetWord.Length)
+            {
+                CompleteMiniGame();
+            }
         }
-
-        // 2. Checa se completou a palavra perfeitamente
-        if (currentInput.Equals(targetWord, StringComparison.OrdinalIgnoreCase))
+        else
         {
-            CompleteMiniGame();
+            // ERROU a letra -> Pisca em vermelho e reinicia do zero!
+            StartCoroutine(FlashErrorAndReset());
         }
     }
 
-    void UpdateUI()
+    void UpdateColoredUI()
     {
-        if (wordDisplay != null) wordDisplay.text = targetWord;
-        if (inputDisplay != null) inputDisplay.text = currentInput;
+        if (wordDisplay == null) return;
+
+        string correctHex = ColorUtility.ToHtmlStringRGB(correctColor);
+        string remainingHex = ColorUtility.ToHtmlStringRGB(remainingColor);
+
+        string typedPart = targetWord.Substring(0, currentInput.Length);
+        string remainingPart = targetWord.Substring(currentInput.Length);
+
+        // Formata o texto com Rich Text Tags do TMP
+        string formattedText = $"<color=#{correctHex}>{typedPart}</color><color=#{remainingHex}>{remainingPart}</color>";
+
+        wordDisplay.text = formattedText;
+
+        if (inputDisplay != null)
+        {
+            inputDisplay.text = currentInput;
+        }
+    }
+
+    IEnumerator FlashErrorAndReset()
+    {
+        isFlashingError = true;
+
+        if (wordDisplay != null)
+        {
+            string errorHex = ColorUtility.ToHtmlStringRGB(errorColor);
+            wordDisplay.text = $"<color=#{errorHex}>{targetWord}</color>";
+        }
+
+        // Aguarda 0.25s para o jogador ver o erro em vermelho
+        yield return new WaitForSeconds(0.25f);
+
+        // Reinicia a palavra do início
+        currentInput = "";
+        isFlashingError = false;
+        UpdateColoredUI();
     }
 
     private void CompleteMiniGame()
