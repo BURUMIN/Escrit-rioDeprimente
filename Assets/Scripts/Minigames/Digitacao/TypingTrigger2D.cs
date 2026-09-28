@@ -7,7 +7,10 @@ public class TypingTrigger2D : MonoBehaviour
     [Header("Referências")]
     public TypingManager typingManager;
     public KeyCode interactKey = KeyCode.E;
-    public TextMeshPro promptText;
+
+    // Suporta TextMeshPro (Canvas UI) ou TextMeshPro (World 3D)
+    public TextMeshProUGUI promptTextCanvas;
+    public TextMeshPro promptTextWorld;
 
     [Header("Controle do Jogador")]
     public PlayerMovement playerScript;
@@ -17,8 +20,7 @@ public class TypingTrigger2D : MonoBehaviour
 
     void Start()
     {
-        if (promptText != null)
-            promptText.gameObject.SetActive(false);
+        SetPromptActive(false);
     }
 
     void OnEnable()
@@ -43,13 +45,19 @@ public class TypingTrigger2D : MonoBehaviour
 
     void StartMiniGame()
     {
-        isMiniGameRunning = true;
+        if (typingManager == null)
+        {
+            Debug.LogError("[TypingTrigger2D] TypingManager não está atribuído no Inspector!");
+            return;
+        }
 
-        if (promptText != null)
-            promptText.gameObject.SetActive(false);
+        isMiniGameRunning = true;
+        SetPromptActive(false);
 
         if (playerScript != null)
+        {
             playerScript.SetCanMove(false);
+        }
 
         typingManager.StartMiniGame();
     }
@@ -59,31 +67,43 @@ public class TypingTrigger2D : MonoBehaviour
         isMiniGameRunning = false;
 
         if (playerScript != null)
+        {
             playerScript.SetCanMove(true);
+        }
 
-        if (isPlayerInRange && promptText != null)
-            promptText.gameObject.SetActive(true);
+        if (isPlayerInRange)
+        {
+            SetPromptActive(true);
+        }
     }
 
     void HandleSuccess()
     {
-        Debug.Log("Sucesso! Mini-game concluído.");
         EndMiniGame();
     }
 
     void HandleFailure()
     {
-        Debug.Log("Falha! Tempo esgotado.");
         EndMiniGame();
+    }
+
+    private void SetPromptActive(bool active)
+    {
+        if (promptTextCanvas != null) promptTextCanvas.gameObject.SetActive(active);
+        if (promptTextWorld != null) promptTextWorld.gameObject.SetActive(active);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
+            // Tenta pegar o PlayerMovement automaticamente caso esqueça de arrastar no Inspector
+            if (playerScript == null)
+                playerScript = collision.GetComponent<PlayerMovement>();
+
             isPlayerInRange = true;
-            if (promptText != null && !isMiniGameRunning)
-                promptText.gameObject.SetActive(true);
+            if (!isMiniGameRunning)
+                SetPromptActive(true);
         }
     }
 
@@ -92,8 +112,7 @@ public class TypingTrigger2D : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             isPlayerInRange = false;
-            if (promptText != null)
-                promptText.gameObject.SetActive(false);
+            SetPromptActive(false);
         }
     }
 }

@@ -1,177 +1,132 @@
+using System;
 using UnityEngine;
 using TMPro;
-using System;
 
 public class TypingManager : MonoBehaviour
 {
-    [Header("UI References")]
-    public GameObject miniGameCanvasGroup;
-    public TextMeshProUGUI wordOutput;
-    public TextMeshProUGUI scoreOutput;
-    public TextMeshProUGUI timerOutput;
-
-    [Header("Configuração do JSON")]
-    public string jsonFileName = "words";
-
-    [Header("Configurações do Jogo")]
-    public float timePerWord = 5f;
-    public int pointsPerWord = 100;
-    public int targetWordsToWin = 3;
-
-    private string[] wordList;
-
     public static event Action OnMiniGameCompleted;
     public static event Action OnMiniGameFailed;
 
-    private Word activeWord;
-    private float currentTime;
-    private int score = 0;
-    private int wordsCompleted = 0;
-    private bool isGameActive = false;
+    [Header("UI References")]
+    public GameObject miniGameCanvas;
+    public TextMeshProUGUI wordDisplay;
+    public TextMeshProUGUI inputDisplay;
 
-    void Awake()
-    {
-        LoadWordsFromJSON();
-    }
+    [Header("Word Settings")]
+    public TextAsset wordsFile;
+    private string[] wordList;
+
+    private string targetWord = "";
+    private string currentInput = "";
+    private bool isGameActive = false;
 
     void Start()
     {
-        if (miniGameCanvasGroup != null)
-            miniGameCanvasGroup.SetActive(false);
+        LoadWords();
+        if (miniGameCanvas != null)
+            miniGameCanvas.SetActive(false);
     }
 
-    void LoadWordsFromJSON()
+    void LoadWords()
     {
-        TextAsset jsonFile = Resources.Load<TextAsset>(jsonFileName);
-
-        if (jsonFile != null)
+        if (wordsFile != null)
         {
-            WordData data = JsonUtility.FromJson<WordData>(jsonFile.text);
-
-            if (data != null && data.words != null && data.words.Length > 0)
+            wordList = wordsFile.text.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < wordList.Length; i++)
             {
-                wordList = data.words;
-                Debug.Log($"[TypingManager] {wordList.Length} palavras carregadas via JSON!");
-            }
-            else
-            {
-                Debug.LogError("[TypingManager] O arquivo JSON está vazio ou mal formatado.");
+                wordList[i] = wordList[i].Trim();
             }
         }
         else
         {
-            Debug.LogError($"[TypingManager] Arquivo '{jsonFileName}' não encontrado em Assets/Resources/!");
+            Debug.LogError("[TypingManager] Arquivo words.txt não foi atribuído!");
+            wordList = new string[] { "teste" };
         }
     }
 
     public void StartMiniGame()
     {
-        if (wordList == null || wordList.Length == 0)
-        {
-            Debug.LogError("[TypingManager] Impossível iniciar: Nenhuma palavra foi carregada.");
-            return;
-        }
+        if (wordList == null || wordList.Length == 0) LoadWords();
 
-        score = 0;
-        wordsCompleted = 0;
+        targetWord = wordList[UnityEngine.Random.Range(0, wordList.Length)];
+        currentInput = "";
         isGameActive = true;
 
-        if (miniGameCanvasGroup != null)
-            miniGameCanvasGroup.SetActive(true);
-
-        UpdateScoreDisplay();
-        SetNextWord();
-    }
-
-    public void StopMiniGame()
-    {
-        isGameActive = false;
-
-        if (miniGameCanvasGroup != null)
-            miniGameCanvasGroup.SetActive(false);
+        if (miniGameCanvas != null) miniGameCanvas.SetActive(true);
+        UpdateUI();
     }
 
     void Update()
     {
         if (!isGameActive) return;
 
-        HandleTimer();
-
-        foreach (char letter in Input.inputString)
+        // Captura caracteres digitados pelo jogador de forma segura
+        foreach (char c in Input.inputString)
         {
-            TypeLetter(letter);
-        }
-    }
-
-    void HandleTimer()
-    {
-        currentTime -= Time.deltaTime;
-
-        if (timerOutput != null)
-        {
-            timerOutput.text = $"Tempo: {Mathf.Max(currentTime, 0):F1}s";
-        }
-
-        if (currentTime <= 0)
-        {
-            StopMiniGame();
-            OnMiniGameFailed?.Invoke();
-        }
-    }
-
-    void SetNextWord()
-    {
-        string randomWord = wordList[UnityEngine.Random.Range(0, wordList.Length)];
-        activeWord = new Word(randomWord);
-        currentTime = timePerWord;
-        UpdateWordDisplay();
-    }
-
-    void TypeLetter(char letter)
-    {
-        if (activeWord.GetNextChar() == letter)
-        {
-            activeWord.TypeLetter();
-            UpdateWordDisplay();
-
-            if (activeWord.WordTyped())
+            if (c == '\b') // Backspace
             {
-                wordsCompleted++;
-                int timeBonus = Mathf.RoundToInt(currentTime * 10);
-                AddScore(pointsPerWord + timeBonus);
-
-                if (wordsCompleted >= targetWordsToWin)
+                if (currentInput.Length > 0)
                 {
-                    StopMiniGame();
-                    OnMiniGameCompleted?.Invoke();
+                    currentInput = currentInput.Substring(0, currentInput.Length - 1);
+                    UpdateUI();
                 }
-                else
-                {
-                    SetNextWord();
-                }
+            }
+            else if (c == '\n' || c == '\r') // Enter
+            {
+                // Opcional: Submeter com Enter
+            }
+            else
+            {
+                // Adiciona o caractere digitado
+                currentInput += c;
+                ValidateInput();
             }
         }
     }
 
-    void AddScore(int amount)
+    void ValidateInput()
     {
-        score += amount;
-        UpdateScoreDisplay();
-    }
+        UpdateUI();
 
-    void UpdateWordDisplay()
-    {
-        if (wordOutput != null)
+        // 1. Checa se o texto digitado até agora está correto
+        if (!targetWord.StartsWith(currentInput, StringComparison.OrdinalIgnoreCase))
         {
-            wordOutput.text = activeWord.GetFormattedText();
+            // O jogador ERROU a digitação!
+            Debug.LogWarning("[TypingManager] Erro de digitação detectado! Reiniciando entrada/Falhando...");
+
+            // Opção A: Limpar a palavra ao errar
+            currentInput = "";
+            UpdateUI();
+
+            // Descomente a linha abaixo se quiser que um ERRO feche o minigame imediatamente:
+            // FailMiniGame(); 
+            return;
+        }
+
+        // 2. Checa se completou a palavra perfeitamente
+        if (currentInput.Equals(targetWord, StringComparison.OrdinalIgnoreCase))
+        {
+            CompleteMiniGame();
         }
     }
 
-    void UpdateScoreDisplay()
+    void UpdateUI()
     {
-        if (scoreOutput != null)
-        {
-            scoreOutput.text = $"Pontos: {score}";
-        }
+        if (wordDisplay != null) wordDisplay.text = targetWord;
+        if (inputDisplay != null) inputDisplay.text = currentInput;
+    }
+
+    private void CompleteMiniGame()
+    {
+        isGameActive = false;
+        if (miniGameCanvas != null) miniGameCanvas.SetActive(false);
+        OnMiniGameCompleted?.Invoke();
+    }
+
+    public void FailMiniGame()
+    {
+        isGameActive = false;
+        if (miniGameCanvas != null) miniGameCanvas.SetActive(false);
+        OnMiniGameFailed?.Invoke();
     }
 }
