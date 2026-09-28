@@ -1,0 +1,12 @@
+{
+  "words": [
+    "unity",
+    "script",
+    "typing",
+    "programacao",
+    "desenvolvimento",
+    "teclado",
+    "algoritmo",
+    "interface"
+  ]
+}

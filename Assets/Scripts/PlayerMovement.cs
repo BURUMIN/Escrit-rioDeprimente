@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
     public float speed;
+    public bool canMove = true;
 
     public Animator animator;
 
@@ -26,5 +27,12 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         rb.linearVelocity = new Vector2(moveDirection.x * speed, moveDirection.y * speed);
+    }
+
+    [Obsolete]
+    public void SetCanMove(bool value)
+    {
+        canMove = value;
+        rb.velocity = Vector2.zero;
     }
 }
